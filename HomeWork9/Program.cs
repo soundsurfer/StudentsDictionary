@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,12 +19,16 @@ namespace HomeWork9
 
         public string Name { get => name; set => name = value; }
         public string Lastname { get => lastname; set => lastname = value; }
-      
+
         public int CompareTo(Student other)
         {
             string s1 = lastname + " " + name;
             string s2 = other.lastname + " " + other.name;
             return s1.CompareTo(s2);
+        }
+        public override string ToString()
+        {
+            return lastname + " " + name;
         }
     }
     class RangeException : Exception
@@ -51,7 +56,7 @@ namespace HomeWork9
             }
         }
     }
-    class DictionaryStudents
+    class DictionaryStudents : IEnumerable, IEnumerable<KeyValuePair<Student, int>>
     {
         private SortedDictionary<Student, int> group;
 
@@ -84,27 +89,62 @@ namespace HomeWork9
                     AddStudent(new Student(name, lastname), m);
                     n--;
                 }
-                catch(ExistException ee)
+                catch (ExistException ee)
                 {
                     Console.WriteLine(ee.Message);
                 }
-                catch(RangeException re)
+                catch (RangeException re)
                 {
                     Console.WriteLine(re.Message);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Message);
                 }
             }
-            
-            
+
+
         }
         public void ListStudents()
         {
             foreach (var ls in group)
                 Console.WriteLine("Student: {1} {0}, Mark: {2}", ls.Key.Lastname, ls.Key.Name, ls.Value);
         }
+
+        public IEnumerator<KeyValuePair<Student, int>> GetEnumerator()
+        {
+            foreach(var st in group)
+            {
+                yield return st;
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)group).GetEnumerator();
+        }
+
+        public int this[Student s]
+        {
+            get
+            {
+                return group[s];
+            }
+            set
+            {
+                group[s] = value;
+            }
+        }
+        public SortedDictionary<Student, int>.KeyCollection GetKeys()
+        {
+            return group.Keys;
+        }
+        public int Count()
+        {
+            return group.Count;
+        }
+
+        
     }
     class Program
     {
@@ -114,7 +154,21 @@ namespace HomeWork9
             Console.WriteLine("Введите количество студентов: ");
             int n = int.Parse(Console.ReadLine());
             ds.AddStudents(n);
-            ds.ListStudents();
+
+            Console.WriteLine("Вывод списка с помощью foreach:");
+            foreach (var st in ds)
+                Console.WriteLine("{0}  {1}", st.Key, st.Value);
+
+            Console.WriteLine("Вывод информации о первом студенте");
+            Student s = ds.GetKeys().First<Student>();
+
+            Console.WriteLine("{0}  {1}", s, ds[s]);
+            Console.WriteLine("Вывод списка группы с помощью for:");
+            for (int i = 0; i < ds.Count(); i++)
+            {
+                s = ds.GetKeys().ElementAt<Student>(i);
+                Console.WriteLine("{0}  {1}", s, ds[s]);
+            }
         }
     }
 }
