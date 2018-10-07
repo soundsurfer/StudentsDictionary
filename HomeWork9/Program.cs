@@ -79,8 +79,9 @@ namespace HomeWork9
         {
             while (n > 0)
             {
-                Console.WriteLine("Введите имя и фамилию студента:");
+                Console.WriteLine("Введите имя студента:");
                 string name = Console.ReadLine();
+                Console.WriteLine("Введите фамилию студента:");
                 string lastname = Console.ReadLine();
                 Console.WriteLine("Введите оценку:");
                 int m = int.Parse(Console.ReadLine());
