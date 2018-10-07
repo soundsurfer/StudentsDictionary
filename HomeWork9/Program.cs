@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HomeWork9
 {
-    class Student
+    class Student : IComparable<Student>
     {
         private string name;
         private string lastname;
@@ -18,22 +18,12 @@ namespace HomeWork9
 
         public string Name { get => name; set => name = value; }
         public string Lastname { get => lastname; set => lastname = value; }
-        public class CompareByLastName : IComparer<Student>
+      
+        public int CompareTo(Student other)
         {
-            public int Compare(Student x, Student y)
-            {
-                if ((x.Lastname == y.Lastname) && (x.Name == y.Name))
-                    throw new ExistException();
-                else
-                {
-                    if(x.Lastname == y.Lastname)
-                    {
-                        return String.Compare(x.Name, y.Name);
-                    }
-                    return String.Compare(x.Lastname, y.Lastname);
-                }
-                
-            }
+            string s1 = lastname + " " + name;
+            string s2 = other.lastname + " " + other.name;
+            return s1.CompareTo(s2);
         }
     }
     class RangeException : Exception
@@ -63,54 +53,57 @@ namespace HomeWork9
     }
     class DictionaryStudents
     {
-        SortedDictionary<Student, int> ds = new SortedDictionary<Student, int>(new Student.CompareByLastName());
+        private SortedDictionary<Student, int> group;
+
+        public DictionaryStudents()
+        {
+            group = new SortedDictionary<Student, int>();
+        }
+
         private void AddStudent(Student st, int mark)
         {
-            try
-            {
-                ds.Add(st, mark);
-            }
-            catch (ExistException ee) 
-            {
-                Console.WriteLine("Exception: {0}", ee.Message);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: {0}", e.Message);
-            }
+            if (group.Keys.Contains<Student>(st))
+                throw new ExistException();
+            else
+                if (mark < 0 || mark > 100)
+                throw new RangeException(mark);
+            else
+                group.Add(st, mark);
         }
         public void AddStudents(int n)
         {
-            try
+            while (n > 0)
             {
-                for (int i = 0; i < n; i++)
+                Console.WriteLine("Введите имя и фамилию студента:");
+                string name = Console.ReadLine();
+                string lastname = Console.ReadLine();
+                Console.WriteLine("Введите оценку:");
+                int m = int.Parse(Console.ReadLine());
+                try
                 {
-                    Console.WriteLine("Set name");
-                    string sn = Console.ReadLine();
-                    Console.WriteLine("Set last name");
-                    string sln = Console.ReadLine();
-                    Console.WriteLine("Set mark");
-                    int m = int.Parse(Console.ReadLine());
-                    if(m > 100 || m < 0)
-                    {
-                        throw new RangeException(m);
-                    }
-                    AddStudent(new Student(sn, sln), m);
+                    AddStudent(new Student(name, lastname), m);
+                    n--;
+                }
+                catch(ExistException ee)
+                {
+                    Console.WriteLine(ee.Message);
+                }
+                catch(RangeException re)
+                {
+                    Console.WriteLine(re.Message);
+                }
+                catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
                 }
             }
-            catch(RangeException re)
-            {
-                Console.WriteLine("Exception: {0}", re.Message);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("Exception: {0}", e.Message);
-            }
+            
+            
         }
         public void ListStudents()
         {
-            foreach (var ls in ds)
-                Console.WriteLine("Student: {1} {0}, Mark: {2}", ls.Key.Name, ls.Key.Lastname, ls.Value);
+            foreach (var ls in group)
+                Console.WriteLine("Student: {1} {0}, Mark: {2}", ls.Key.Lastname, ls.Key.Name, ls.Value);
         }
     }
     class Program
@@ -118,7 +111,9 @@ namespace HomeWork9
         static void Main(string[] args)
         {
             DictionaryStudents ds = new DictionaryStudents();
-            ds.AddStudents(3);
+            Console.WriteLine("Введите количество студентов: ");
+            int n = int.Parse(Console.ReadLine());
+            ds.AddStudents(n);
             ds.ListStudents();
         }
     }
